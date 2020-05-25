@@ -1,0 +1,24 @@
+language: generic
+sudo: required
+services:
+  - docker
+  
+before_install: 
+  - docker build -t kmandati/multi-docker-react -f ./client/Dockerfile.dev .
+  
+script:
+  - docker run kmandati/multi-docker-react npm test -- --coverage
+  
+after_success:
+  - docker build -t kmandati/multi-docker-client ./client
+  - docker build -t kmandati/multi-docker-nginx ./nginx
+  - docker build -t kmandati/multi-docker-server ./server
+  - docker build -t kmandati/multi-docker-worker ./worker
+  # Login to docker CLI
+  - echo "$DOCKER_PWD" | docker login -u "$DOCKER_ID" --password--stdin
+  # Take those images and push them to docker hub
+  - docker push kmandati/multi-docker-client
+  - docker push kmandati/multi-docker-nginx
+  - docker push kmandati/multi-docker-server
+  - docker push kmandati/multi-docker-worker
+  
